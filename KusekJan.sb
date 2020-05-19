@@ -1,0 +1,135 @@
+szerokosc = 10
+wysokosc = 20
+bok = 30
+GraphicsWindow.KeyDown = sterowanieStrzalkami
+GraphicsWindow.Width = szerokosc*bok
+GraphicsWindow.Height = wysokosc*bok
+For i=1 To szerokosc  
+  For j=1 To wysokosc
+    GraphicsWindow.DrawRectangle((i-1)*bok,(j-1)*bok,bok,bok)
+    GraphicsWindow.BrushColor="#FFFFFF"
+    GraphicsWindow.FillRectangle((i-1)*bok+1,(j-1)*bok+1, bok-1, bok-1)
+  EndFor
+EndFor
+
+licznikPkt=0
+nowyKsztalt()
+
+For z = 1 To szerokosc
+granica[z] = GraphicsWindow.Height
+EndFor
+
+
+
+Sub nowyKsztalt
+  x = 0
+  y = 0
+  ksztaltSzer = Math.GetRandomNumber(3)
+  ksztaltWys = Math.GetRandomNumber(3)
+  GraphicsWindow.BrushColor = GraphicsWindow.GetRandomColor()
+  While GraphicsWindow.BrushColor = "White"
+    GraphicsWindow.BrushColor = GraphicsWindow.GetRandomColor()
+  EndWhile
+  ksztalt = Shapes.AddRectangle(ksztaltSzer*bok, ksztaltWys*bok)
+  licznikPkt = licznikPkt + 1
+  GraphicsWindow.Title = licznikPkt
+EndSub
+
+Timer.Interval = 300
+Timer.Tick = ruszKsztalt
+
+Sub ruszKsztalt
+  Shapes.Move(ksztalt,x,y)
+  y = y + bok
+  zatRuchu()
+EndSub
+
+Sub zatRuchu
+  For z = 1 To szerokosc
+    For q = 1 To ksztaltSzer
+      If y+(ksztaltWys*bok) > granica[z] And (x/bok)+q = z Then
+        For w = 1 To ksztaltSzer
+          granica [(x/bok)+w] = y-bok
+        EndFor
+        Shapes.Remove(ksztalt)
+        GraphicsWindow.FillRectangle(x+1,y-bok+1, ksztaltSzer*bok-3,ksztaltWys*bok-3)
+        znalezienieLinii()
+        czyNowy()
+        Timer.Interval=300
+      EndIf
+    EndFor
+  EndFor
+EndSub
+
+Sub czyNowy
+  For b = 1 To szerokosc
+    If granica[b] <= 0 Then
+      Timer.Pause()
+      GraphicsWindow.ShowMessage("Przegrales - liczba punktów to "+licznikPkt,"Przegrales")
+      Program.End()
+    EndIf
+  EndFor
+  nowyKsztalt()
+EndSub
+
+
+Sub sterowanieStrzalkami
+  If GraphicsWindow.LastKey = "Left" And x*bok>bok Then
+    x = x-bok
+    Shapes.Move(ksztalt,x,y)
+  EndIf
+  If GraphicsWindow.LastKey = "Right" And x+ksztaltSzer*bok < szerokosc*bok Then
+    x = x+bok
+    Shapes.Move(ksztalt,x,y)
+  EndIf
+  If GraphicsWindow.LastKey = "Escape" Then
+    Program.End()
+  EndIf
+  If GraphicsWindow.LastKey = "Down" Then
+    Timer.Interval=0
+  EndIf
+  If GraphicsWindow.LastKey = "Up"  Then
+    pom = ksztaltWys
+    ksztaltWys= ksztaltSzer
+    ksztaltSzer=pom
+    Shapes.Remove(ksztalt)
+    ksztalt = Shapes.AddRectangle(ksztaltSzer*bok, ksztaltWys*bok)
+    Shapes.Move(ksztalt,x,y)
+    y = y + bok
+  EndIf
+EndSub
+
+Sub znalezienieLinii
+  Timer.Pause()
+  For q=1 To  wysokosc
+  For w=1 To szerokosc
+      if GraphicsWindow.GetPixel((w-1)*bok + 15,(q-1)*bok + 15) = "#FFFFFF" Then
+        Goto break
+      EndIf
+    EndFor
+    pomY=q
+    usunLinie()
+    break:
+  EndFor
+  Timer.Resume()
+ EndSub
+ Sub usunLinie
+   For j=pomY To 2 Step -1
+   For i=1 To szerokosc
+     GraphicsWindow.BrushColor=GraphicsWindow.GetPixel((i-1)*bok+15,(j-3)*bok+45)
+     GraphicsWindow.FillRectangle((i-1)*bok,(j-1)*bok, bok-1, bok-1)
+   EndFor
+   EndFor
+   For j=1 to szerokosc
+     GraphicsWindow.BrushColor="#FFFFFF"
+     GraphicsWindow.FillRectangle((i-1)*bok+1,(j-1)*bok+1, bok-1, bok-1)
+   EndFor
+   For w = 1 To szerokosc
+     granica[w] = granica[w]+bok
+   EndFor
+   
+   EndSub
+   
+  
+        
+  
